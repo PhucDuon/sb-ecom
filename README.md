@@ -1,106 +1,158 @@
-🛒 E-Commerce Backend System
+# 🛒 E-Commerce Backend System
 
-A scalable backend system for an e-commerce platform, focusing on high concurrency order processing, asynchronous payment handling, and robust system design using modern backend technologies.
+A scalable backend system for an e-commerce platform, focusing on **high-concurrency order processing**, **asynchronous payment handling**, and **clean system design** using modern backend technologies.
 
-📌 Features Overview
-🔐 Authentication & Authorization
+---
 
-JWT-based authentication
+## 🚀 Features
 
-Role-based access control:
+### 🔐 Authentication & Authorization
+- JWT-based authentication
+- Role-based access control (USER, ADMIN)
+- Stateless security with Spring Security
+- Admin-only APIs protected using `@PreAuthorize`
 
-USER: browse products, place orders, view own orders
+---
 
-ADMIN: manage products, view reports, create admin accounts
+### 📦 Product Management
+- CRUD product management (Admin)
+- Public product listing and search
+- Full-text search using Elasticsearch
+- Pagination & sorting
+- Event-driven sync between PostgreSQL and Elasticsearch (RabbitMQ)
 
-Stateless security using Spring Security + JWT filter
+---
 
-🛍 Product Management
+### 🧾 Order Processing (Concurrency Safe)
+- Safe order placement under high concurrency
+- Redis Distributed Lock (Redisson) to prevent overselling
+- Order lifecycle:
+  - PENDING_PAYMENT
+  - PAID
+  - CANCELLED
 
-CRUD operations for products (Admin only)
+---
 
-Product attributes:
+### 💳 Asynchronous Payment
+- Payment handled asynchronously via RabbitMQ
+- Order service publishes payment events
+- Payment service consumes and processes payments
+- Idempotent consumer design
 
-Name, description, price, stock, active status
+---
 
-Public product search and listing
+### ⏱ Auto-Cancel Unpaid Orders
+- Orders auto-cancelled after 15 minutes if unpaid
+- Implemented using RabbitMQ TTL & Dead Letter Queue
+- Stock rollback handled safely with Redis lock
 
-Elasticsearch integration for:
+---
 
-Full-text search
+### 📊 Admin Reporting
+- Revenue & order statistics
+- Paid vs cancelled orders
+- Low-stock product alerts
+- New user statistics (day / month / year)
 
-Filtering by price range
+---
 
-Pagination & sorting
+## 🏗 System Architecture
 
-Event-driven sync between PostgreSQL and Elasticsearch using RabbitMQ
+Client  
+⬇  
+Spring Boot Backend  
+- Auth Module  
+- Product Module (PostgreSQL + Elasticsearch)  
+- Order Module (Redis Lock)  
+- Payment Module (Async)  
+⬇  
+RabbitMQ  
 
-🧾 Order Processing (High Concurrency Safe)
+---
 
-Users can place orders concurrently without overselling
+## 🛠 Tech Stack
+- Java 17
+- Spring Boot
+- Spring Security + JWT
+- PostgreSQL
+- Redis (Redisson)
+- RabbitMQ
+- Elasticsearch
+- Spring Data JPA
+- Maven
 
-Redis Distributed Lock (Redisson) used to:
+---
 
-Lock product stock per product ID
+## 📁 Project Structure
 
-Prevent race conditions under high load
+```
+src/main/java/com/ecommerce/project
+├── auth
+├── product
+├── order
+├── reporting
+├── messaging
+└── config
+```
 
-Order lifecycle:
+---
 
-PENDING_PAYMENT
+## 🎯 Key Design Decisions
+- Redis distributed locking for concurrency safety
+- Event-driven architecture
+- Idempotent message consumers
+- TTL + DLQ instead of cron jobs for order timeout
 
-PAID
+---
 
-CANCELLED
+## ▶ How to Run
 
-💳 Asynchronous Payment System
+### Prerequisites
+- Java 17+
+- PostgreSQL
+- Redis
+- RabbitMQ
+- Elasticsearch
 
-Payment requests are processed asynchronously via RabbitMQ
+### Run Application
+```
+mvn clean install
+mvn spring-boot:run
+```
 
-Order service publishes payment request events
+---
 
-Payment service:
+## 🔌 Sample APIs
 
-Handles payment logic
+**Public**
+- GET `/api/products`
+- GET `/api/products/search`
 
-Ensures idempotent processing
+**User**
+- POST `/api/orders`
+- GET `/api/orders/my`
 
-Payment results are sent back to order service via events
+**Admin**
+- POST `/api/admin/products`
+- GET `/api/admin/reports`
 
-⏱ Auto-Cancel Unpaid Orders (TTL + DLQ)
+---
 
-Orders unpaid after 15 minutes are automatically cancelled
+## 🧪 Testing
+- API testing with Postman
+- Concurrency testing using JMeter
+- Verified race-condition safety under load
 
-Implemented using RabbitMQ TTL + Dead Letter Queue
+---
 
-Flow:
+## 🔮 Future Improvements
+- Integrate Stripe / PayPal
+- Saga pattern for distributed transactions
+- Docker & Kubernetes
+- CI/CD pipeline
 
-Order created → message sent to delay queue
+---
 
-TTL expires → message routed to DLQ
-
-Order is checked and auto-cancelled if still unpaid
-
-Stock is rolled back safely using Redis lock
-
-📊 Admin Reporting Module
-
-(Admin-only endpoints)
-
-Overview dashboard:
-
-Total orders
-
-Total revenue
-
-Paid orders
-
-Failed payments
-
-Revenue reports grouped by month
-
-Low-stock product alerts
-
-New users statistics:
-
-Per day / week / month / year
+## 👤 Author
+**Minh Phuc Duong**  
+Java Backend Developer
